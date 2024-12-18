@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  db-device:
+    image: postgres
+    ports:
+      - "5411:5432"
+    environment:
+      POSTGRES_DB: Device
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - D:\an4\sem1\sd\sdTema2\SDB_TEMA3\volumes\device:/var/lib/postgresql/data
+
+  db-person:
+    image: postgres
+    ports:
+      - "5410:5432"
+    environment:
+      POSTGRES_DB: postgresLocal
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - D:\an4\sem1\sd\sdTema2\SDB_TEMA3\volumes\person:/var/lib/postgresql/data
+
+  db-monitoring:
+    image: postgres
+    ports:
+      - "5412:5432"
+    environment:
+      POSTGRES_DB: CommunicationDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - D:\an4\sem1\sd\sdTema2\SDB_TEMA3\volumes\monotoring:/var/lib/postgresql/data
+
+  db-chat:
+    image: postgres
+    ports:
+      - "5413:5432"
+    environment:
+      POSTGRES_DB: chat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - D:\an4\sem1\sd\sdTema2\SDB_TEMA3\volumes\chat:/var/lib/postgresql/data
+
+
+  springdevice:
+    build: ./DS2023_30242_Boca_Bianca_Assignment_3_Device_Microservice
+    ports:
+      - "8081:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_RABBITMQ_HOST: kangaroo.rmq.cloudamqp.com
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: yrkwgzgj
+      SPRING_RABBITMQ_PASSWORD: 0FVvQVopTkz1WIm1k5ox92rGfTYOf4zw
+      SPRING_RABBITMQ_VIRTUAL_HOST: yrkwgzgj
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-device:5432/Device
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+
+  springperson:
+    build: ./DS2023_30242_Boca_Bianca_Assignment_3_Person_Microservice
+    ports:
+      - "8082:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-person:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+
+  monitoring:
+    build: ./DS2023_30242_Boca_Bianca_Assignment_3_SmartMonotoring_Microservice
+    ports:
+      - "8083:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_RABBITMQ_HOST: kangaroo.rmq.cloudamqp.com
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: yrkwgzgj
+      SPRING_RABBITMQ_PASSWORD: 0FVvQVopTkz1WIm1k5ox92rGfTYOf4zw
+      SPRING_RABBITMQ_VIRTUAL_HOST: yrkwgzgj
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-monitoring:5432/CommunicationDB
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+
+  chat:
+    build: ./DS2023_30242_Boca_Bianca_Assignment_3_Chat_Microservice
+    ports:
+      - "8084:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-chat:5432/chat
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+
+  react-demo:
+    build: ./DS2023_30242_Boca_Bianca_Assignment_3_React_Component
+    ports:
+      - "3000:3000"
+    depends_on:
+      - springdevice
+      - springperson
+      - monitoring
